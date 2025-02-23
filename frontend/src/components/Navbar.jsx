@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   FaSignOutAlt,
@@ -11,12 +11,13 @@ import {
 } from 'react-icons/fa';
 import { MdTask } from 'react-icons/md';
 import Logo from '../assets/Xecute.svg';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Navbar = ({ type }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { darkMode, toggleTheme } = useTheme();
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -36,16 +37,19 @@ const Navbar = ({ type }) => {
         <div className="flex items-center justify-between py-3">
           {/* Logo and Main Link */}
           <div className="flex items-center justify-center gap-12">
-            {/* Logo: Route based on login type */}
             <Link
-              to={type === 'admin' ? '/dashboard/admin' : type === 'intern' ? '/dashboard/intern' : '/'}
+              to={
+                type === 'admin'
+                  ? '/dashboard/admin'
+                  : type === 'intern'
+                  ? '/dashboard/intern'
+                  : '/'
+              }
               className="flex items-center justify-center gap-2 text-3xl font-bold text-gray-800 dark:text-white"
             >
               <img src={Logo} alt="Xecute Logo" className="w-10 h-10 mt-1" />
               Xecute
             </Link>
-
-            {/* Desktop Navigation Links for Admin */}
             {type === 'admin' && (
               <div className="hidden md:flex md:items-center md:justify-center gap-6 md:mt-1">
                 <Link
@@ -74,9 +78,18 @@ const Navbar = ({ type }) => {
             )}
           </div>
 
-          {/* Desktop Right Section: Dark Mode Toggle & Logout */}
+          {/* Desktop Right Section: Theme Toggle & Logout */}
           <div className="hidden md:flex items-center gap-4">
-            {/* You can add a dark mode toggle here if needed */}
+            <button
+              onClick={toggleTheme}
+              className="cursor-pointer p-2 bg-gray-200 dark:bg-gray-700 rounded transition duration-300"
+            >
+              {darkMode ? (
+                <FaSun size={20} className="text-gray-900" />
+              ) : (
+                <FaMoon size={20} className="text-gray-900" />
+              )}
+            </button>
             <button
               onClick={handleLogout}
               className="flex items-center text-gray-800 dark:text-gray-300 hover:text-red-600 cursor-pointer transition duration-300"
@@ -137,6 +150,23 @@ const Navbar = ({ type }) => {
               className="w-full text-left px-4 py-2 text-gray-800 dark:text-gray-300 hover:text-red-600 transition duration-300"
             >
               Logout <FaSignOutAlt className="inline ml-2" />
+            </button>
+            <button
+              onClick={() => {
+                setIsOpen(false);
+                toggleTheme();
+              }}
+              className="w-full text-left px-4 py-2 text-gray-800 dark:text-gray-300 hover:text-yellow-500 transition duration-300"
+            >
+              {darkMode ? (
+                <>
+                  <FaSun className="inline mr-2" /> Light Mode
+                </>
+              ) : (
+                <>
+                  <FaMoon className="inline mr-2" /> Dark Mode
+                </>
+              )}
             </button>
           </div>
         </div>
