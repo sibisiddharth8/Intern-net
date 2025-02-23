@@ -1,11 +1,23 @@
 import React, { useState } from 'react';
 import axios from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
-import { FaEnvelope, FaLock, FaSignInAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
+import {
+  FaEnvelope,
+  FaLock,
+  FaSignInAlt,
+  FaEye,
+  FaEyeSlash,
+} from 'react-icons/fa';
 import { ImSpinner2 } from 'react-icons/im'; // Import spinner icon
 import Logo from '../assets/Xecute.svg';
-
 import Notification from '../components/Notification';
+
+// Loading overlay component
+const LoadingOverlay = () => (
+  <div className="fixed inset-0 flex items-center justify-center bg-black opacity-80 z-50">
+    <ImSpinner2 className="w-12 h-12 text-white animate-spin" />
+  </div>
+);
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -19,28 +31,30 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setNotification({ message: '', type: '' });
-    setLoading(true); // Start loading
+    setLoading(true); // Start loading and keep it until navigation
 
     try {
       const res = await axios.post('/auth/login', { email, password });
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('userId', res.data.user._id);
+      localStorage.setItem('role', res.data.user.role); // Save role for protected routing
 
       // Show success notification
       setNotification({ message: 'Login successful!', type: 'success' });
 
+      // Delay navigation while keeping the loader visible
       setTimeout(() => {
         if (res.data.user.role === 'admin') {
           navigate('/dashboard/admin');
         } else {
           navigate('/dashboard/intern');
         }
+        setLoading(false); // Turn off loader after navigation
       }, 2000);
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Login failed';
       setNotification({ message: errorMessage, type: 'error' });
-    } finally {
-      setLoading(false); // Stop loading after response
+      setLoading(false); // Stop loading on error
     }
   };
 
@@ -49,9 +63,17 @@ const Login = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center min-h-screen bg-gray-300 dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900">
-      <img src={Logo} alt="Logo" className="w-1/14 translate-y-1/2 translate-x-1" />
-      <form onSubmit={handleSubmit} className="flex flex-col items-center justify-center gap-8 bg-gray-200 dark:bg-gray-800 p-8 rounded-xl shadow-md border w-80">
+    <div className="h-screen flex flex-col items-center justify-center min-h-screen bg-gray-300 dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 relative">
+      {loading && <LoadingOverlay />}
+      <img
+        src={Logo}
+        alt="Logo"
+        className="w-1/14 translate-y-1/2 translate-x-1 z-20"
+      />
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col items-center justify-center gap-8 bg-gray-200 dark:bg-gray-800 p-8 rounded-xl shadow-md border w-80 z-10"
+      >
         <div className="flex flex-col items-center justify-center gap-2">
           <div className="mt-2">
             <h2 className="text-center text-3xl dark:text-white font-bold">

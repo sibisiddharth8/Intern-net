@@ -1,3 +1,4 @@
+// src/contexts/ThemeContext.jsx
 import React, { createContext, useState, useEffect, useContext } from 'react';
 
 const ThemeContext = createContext({
@@ -8,13 +9,14 @@ const ThemeContext = createContext({
 export const ThemeProvider = ({ children }) => {
   const [darkMode, setDarkMode] = useState(false);
 
+  // On mount, check localStorage for a saved theme preference and update document root
   useEffect(() => {
-    // Check localStorage for a saved theme preference
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
       setDarkMode(true);
       document.documentElement.classList.add('dark');
     } else {
+      setDarkMode(false);
       document.documentElement.classList.remove('dark');
     }
   }, []);

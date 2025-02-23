@@ -6,12 +6,11 @@ import {
   FaTimes,
   FaUserFriends,
   FaClipboardList,
-  FaSun,
-  FaMoon,
 } from 'react-icons/fa';
 import { MdTask } from 'react-icons/md';
 import Logo from '../assets/Xecute.svg';
 import { useTheme } from '../contexts/ThemeContext';
+import { FaSun, FaMoon } from 'react-icons/fa';
 
 const Navbar = ({ type }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,6 +29,26 @@ const Navbar = ({ type }) => {
 
   // Helper to check active link
   const isActive = (path) => location.pathname === path;
+
+  // ToggleSwitch component with icon inside the slider
+  const ToggleSwitch = () => (
+    <label className="relative inline-flex items-center cursor-pointer">
+      <input
+        type="checkbox"
+        checked={darkMode}
+        onChange={toggleTheme}
+        className="sr-only peer"
+      />
+      <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors duration-300 peer-checked:bg-blue-600" />
+      <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-300 peer-checked:translate-x-5 flex items-center justify-center">
+        {darkMode ? (
+          <FaMoon className="text-blue-500" size={12} />
+        ) : (
+          <FaSun className="text-yellow-500" size={12} />
+        )}
+      </div>
+    </label>
+  );
 
   return (
     <nav className="bg-white dark:bg-gray-800 shadow">
@@ -78,18 +97,9 @@ const Navbar = ({ type }) => {
             )}
           </div>
 
-          {/* Desktop Right Section: Theme Toggle & Logout */}
+          {/* Desktop Right Section: Toggle Switch & Logout */}
           <div className="hidden md:flex items-center gap-4">
-            <button
-              onClick={toggleTheme}
-              className="cursor-pointer p-2 bg-gray-200 dark:bg-gray-700 rounded transition duration-300"
-            >
-              {darkMode ? (
-                <FaSun size={20} className="text-gray-900" />
-              ) : (
-                <FaMoon size={20} className="text-gray-900" />
-              )}
-            </button>
+            <ToggleSwitch />
             <button
               onClick={handleLogout}
               className="flex items-center text-gray-800 dark:text-gray-300 hover:text-red-600 cursor-pointer transition duration-300"
@@ -149,25 +159,11 @@ const Navbar = ({ type }) => {
               }}
               className="w-full text-left px-4 py-2 text-gray-800 dark:text-gray-300 hover:text-red-600 transition duration-300"
             >
-              Logout <FaSignOutAlt className="inline ml-2" />
+              <FaSignOutAlt className="inline mr-2" /> Logout
             </button>
-            <button
-              onClick={() => {
-                setIsOpen(false);
-                toggleTheme();
-              }}
-              className="w-full text-left px-4 py-2 text-gray-800 dark:text-gray-300 hover:text-yellow-500 transition duration-300"
-            >
-              {darkMode ? (
-                <>
-                  <FaSun className="inline mr-2" /> Light Mode
-                </>
-              ) : (
-                <>
-                  <FaMoon className="inline mr-2" /> Dark Mode
-                </>
-              )}
-            </button>
+            <div className="w-full text-left px-4 py-2 flex items-center">
+              <span className='mr-2'>Theme:</span> <ToggleSwitch />
+            </div>
           </div>
         </div>
       )}

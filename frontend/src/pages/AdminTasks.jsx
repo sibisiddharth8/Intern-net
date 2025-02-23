@@ -13,6 +13,7 @@ import MultiSelect from '../components/MultiSelect';
 import Notification from '../components/Notification';
 import ActionConfirmModal from '../components/ActionConfirmModal';
 import EditTaskModal from '../components/EditTaskModal';
+import ReplyModal from '../components/ReplyModal';
 
 const AdminTasks = () => {
   const [darkMode, setDarkMode] = useState(false);
@@ -31,6 +32,13 @@ const AdminTasks = () => {
   const [confirmAction, setConfirmAction] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // State for Reply Modal
+  const [replyModal, setReplyModal] = useState({
+    isOpen: false,
+    taskId: null,
+    commentId: null,
+  });
 
   // Fetch interns from backend
   const fetchInterns = async () => {
@@ -117,16 +125,13 @@ const AdminTasks = () => {
     }
   };
 
-  const replyToComment = async (taskId, commentId) => {
-    const replyText = prompt('Enter your reply:');
-    if (!replyText) return;
-    try {
-      await axios.post(`/tasks/${taskId}/comments/${commentId}/reply`, { text: replyText });
-      setNotification({ type: 'success', message: 'Reply sent' });
-      fetchTasks();
-    } catch (err) {
-      setNotification({ type: 'error', message: 'Error replying to comment' });
-    }
+  // Open reply modal instead of using a prompt
+  const openReplyModal = (taskId, commentId) => {
+    setReplyModal({ isOpen: true, taskId, commentId });
+  };
+
+  const closeReplyModal = () => {
+    setReplyModal({ isOpen: false, taskId: null, commentId: null });
   };
 
   return (
@@ -134,7 +139,6 @@ const AdminTasks = () => {
     <div className={`${darkMode ? 'dark' : ''}`}>
       <div className="p-6 bg-gray-100 dark:bg-gray-900 min-h-screen text-gray-900 dark:text-white">
         <div className="max-w-5xl mx-auto">
-
           {/* Page Header */}
           <h2 className="text-3xl font-bold flex items-center mb-6">
             <FaTasks className="mr-2" /> Manage Tasks
@@ -225,7 +229,7 @@ const AdminTasks = () => {
 
             <div className="w-full flex justify-end">
               <button
-              onClick={createTask}
+                onClick={createTask}
                 type="submit"
                 className="mt-4 w-max flex items-center justify-center bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition cursor-pointer"
               >
@@ -312,8 +316,8 @@ const AdminTasks = () => {
                             </div>
                           )}
                           <button
-                            onClick={() => replyToComment(task._id, comment._id)}
-                            className="text-xs text-blue-400 mt-1"
+                            onClick={() => openReplyModal(task._id, comment._id)}
+                            className="text-xs text-blue-400 mt-1 cursor-pointer"
                           >
                             Reply
                           </button>
@@ -371,6 +375,17 @@ const AdminTasks = () => {
             setConfirmAction(null);
           }}
           onCancel={() => setConfirmAction(null)}
+        />
+      )}
+
+      {/* Reply Modal */}
+      {replyModal.isOpen && (
+        <ReplyModal
+          isOpen={replyModal.isOpen}
+          taskId={replyModal.taskId}
+          commentId={replyModal.commentId}
+          onClose={closeReplyModal}
+          onReplySent={fetchTasks}
         />
       )}
     </div>
