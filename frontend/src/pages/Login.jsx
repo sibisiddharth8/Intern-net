@@ -1,88 +1,127 @@
 import React, { useState } from 'react';
 import axios from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
-import { FaUser, FaEnvelope, FaLock, FaSignInAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaSignInAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { ImSpinner2 } from 'react-icons/im'; // Import spinner icon
+import Logo from '../assets/Xecute.svg';
+
+import Notification from '../components/Notification';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState({ message: '', type: '' });
+
   const navigate = useNavigate();
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setNotification({ message: '', type: '' });
+    setLoading(true); // Start loading
+
     try {
       const res = await axios.post('/auth/login', { email, password });
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('userId', res.data.user._id);
-      if (res.data.user.role === 'admin') {
-        navigate('/dashboard/admin');
-      } else {
-        navigate('/dashboard/intern');
-      }
+
+      // Show success notification
+      setNotification({ message: 'Login successful!', type: 'success' });
+
+      setTimeout(() => {
+        if (res.data.user.role === 'admin') {
+          navigate('/dashboard/admin');
+        } else {
+          navigate('/dashboard/intern');
+        }
+      }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      const errorMessage = err.response?.data?.message || 'Login failed';
+      setNotification({ message: errorMessage, type: 'error' });
+    } finally {
+      setLoading(false); // Stop loading after response
     }
   };
 
   const toggleShowPassword = () => {
-    setShowPassword(prev => !prev);
+    setShowPassword((prev) => !prev);
   };
 
   return (
-    <div className="h-[100vh] flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-800 to-gray-900">
-      <form onSubmit={handleSubmit} className="bg-gray-800 p-8 rounded shadow-md w-80">
-        <div className="flex justify-center mb-4">
-          <FaUser size={40} className="text-blue-400" />
+    <div className="h-screen flex flex-col items-center justify-center min-h-screen bg-gray-300 dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900">
+      <img src={Logo} alt="Logo" className="w-1/14 translate-y-1/2 translate-x-1" />
+      <form onSubmit={handleSubmit} className="flex flex-col items-center justify-center gap-8 bg-gray-200 dark:bg-gray-800 p-8 rounded-xl shadow-md border w-80">
+        <div className="flex flex-col items-center justify-center gap-2">
+          <div className="mt-2">
+            <h2 className="text-center text-3xl dark:text-white font-bold">
+              Welcome Back!
+            </h2>
+            <p className="text-xs text-center dark:text-gray-400">
+              Sign in to access your account
+            </p>
+          </div>
         </div>
-        <h2 className="text-center text-2xl text-white font-semibold mb-2">
-          Welcome Back!
-        </h2>
-        <p className="text-center text-gray-400 mb-6">
-          Sign in to access your account
-        </p>
-        {error && (
-          <p className="text-center text-red-500 mb-4">{error}</p>
-        )}
-        <div className="flex items-center bg-gray-700 rounded p-2 mb-4">
-          <FaEnvelope className="text-gray-400 mr-2" />
-          <input
-            type="email"
-            placeholder="Email"
-            className="bg-transparent focus:outline-none w-full text-white"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div className="flex items-center bg-gray-700 rounded p-2 mb-4">
-          <FaLock className="text-gray-400 mr-2" />
-          <input
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Password"
-            className="bg-transparent focus:outline-none w-full text-white"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-          />
+
+        {/* Form Inputs */}
+        <div className="flex flex-col items-center justify-center gap-4 w-full">
+          <div className="flex items-center bg-gray-300 dark:bg-gray-700 rounded p-2 w-full">
+            <FaEnvelope className="dark:text-gray-400 mr-2" />
+            <input
+              type="email"
+              placeholder="Email"
+              className="bg-transparent focus:outline-none w-full dark:text-white"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="flex items-center bg-gray-300 dark:bg-gray-700 rounded p-2 w-full">
+            <FaLock className="dark:text-gray-400 mr-2" />
+            <input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Password"
+              className="bg-transparent focus:outline-none w-full dark:text-white"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              onClick={toggleShowPassword}
+              className="cursor-pointer ml-2 text-gray-400 hover:text-blue-400 focus:outline-none"
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
+
           <button
-            type="button"
-            onClick={toggleShowPassword}
-            className="cursor-pointer ml-2 text-gray-400 hover:text-blue-400 focus:outline-none"
+            type="submit"
+            className="cursor-pointer w-max flex justify-center items-center text-white px-4 py-2 mt-2 bg-blue-600 rounded hover:bg-blue-700 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading}
           >
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
+            {loading ? (
+              <>
+                <ImSpinner2 className="mr-2 animate-spin" /> Logging in...
+              </>
+            ) : (
+              <>
+                <FaSignInAlt className="mr-2" /> Login
+              </>
+            )}
           </button>
         </div>
-        <button
-          type="submit"
-          className="cursor-pointer w-full flex justify-center items-center bg-blue-600 p-2 rounded hover:bg-blue-700 transition duration-300"
-        >
-          <FaSignInAlt className="mr-2" />
-          Login
-        </button>
       </form>
+
+      {/* Notification */}
+      {notification.message && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification({ message: '', type: '' })}
+        />
+      )}
     </div>
   );
 };

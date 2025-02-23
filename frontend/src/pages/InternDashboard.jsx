@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../api/axiosInstance';
-import { FaComment } from 'react-icons/fa';
+import { FaComment, FaPaperPlane } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
+import Notification from '../components/Notification';
 
 const InternDashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [commentInputs, setCommentInputs] = useState({});
+  const [notification, setNotification] = useState(null);
 
   // Fetch tasks from the backend
   const fetchTasks = async () => {
@@ -24,9 +26,10 @@ const InternDashboard = () => {
   const updateProgress = async (taskId, status) => {
     try {
       await axios.put(`/tasks/${taskId}/progress`, { status });
+      setNotification({ type: 'success', message: 'Progress updated successfully!' });
       fetchTasks();
     } catch (err) {
-      alert('Error updating progress');
+      setNotification({ type: 'error', message: 'Error updating progress' });
     }
   };
 
@@ -35,21 +38,32 @@ const InternDashboard = () => {
     if (!text || text.trim() === '') return;
     try {
       await axios.post(`/tasks/${taskId}/comments`, { text });
+      setNotification({ type: 'success', message: 'Comment added successfully!' });
       setCommentInputs(prev => ({ ...prev, [taskId]: '' }));
       fetchTasks();
     } catch (err) {
-      alert('Error adding comment');
+      setNotification({ type: 'error', message: 'Error adding comment' });
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navbar type="intern" />
+      {notification && (
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          onClose={() => setNotification(null)}
+        />
+      )}
       <div className="p-4 max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold mb-6 text-white">My Tasks</h2>
+        <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">My Tasks</h2>
         <div className="space-y-6">
           {tasks.map(task => (
-            <div key={task._id} className="bg-gray-800 p-6 rounded shadow text-white">
+            <div
+              key={task._id}
+              className="bg-white dark:bg-gray-800 p-6 rounded shadow text-gray-900 dark:text-white"
+            >
               <div className="flex flex-col md:flex-row md:justify-between md:items-center">
                 <h3 className="text-xl font-bold">{task.title}</h3>
                 <div className="mt-2 md:mt-0">
@@ -57,7 +71,7 @@ const InternDashboard = () => {
                   <select
                     defaultValue="Not Started"
                     onChange={e => updateProgress(task._id, e.target.value)}
-                    className="p-2 bg-gray-700 rounded text-white focus:outline-none"
+                    className="p-2 bg-gray-200 dark:bg-gray-700 rounded text-gray-900 dark:text-white focus:outline-none cursor-pointer"
                   >
                     <option>Not Started</option>
                     <option>In Progress</option>
@@ -72,7 +86,7 @@ const InternDashboard = () => {
                 </p>
               )}
               {task.editedOn && (
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   Edited on: {new Date(task.editedOn).toLocaleString()}
                 </p>
               )}
@@ -80,14 +94,14 @@ const InternDashboard = () => {
                 <h4 className="font-semibold text-lg">Comments</h4>
                 <div className="space-y-2 mt-2">
                   {task.comments.map(comment => (
-                    <div key={comment._id} className="border-t border-gray-600 pt-2">
+                    <div key={comment._id} className="border-t border-gray-300 dark:border-gray-600 pt-2">
                       <p className="text-sm">
                         <strong>{comment.author?.name || 'Unknown'}</strong>: {comment.text}
                       </p>
                       {comment.replies && comment.replies.length > 0 && (
                         <div className="ml-4 space-y-1">
                           {comment.replies.map(reply => (
-                            <p key={reply._id} className="text-xs text-gray-400">
+                            <p key={reply._id} className="text-xs text-gray-500 dark:text-gray-400">
                               <strong>{reply.author?.name || 'Unknown'}</strong>: {reply.text}
                             </p>
                           ))}
@@ -104,20 +118,26 @@ const InternDashboard = () => {
                     onChange={e =>
                       setCommentInputs(prev => ({ ...prev, [task._id]: e.target.value }))
                     }
-                    className="p-2 bg-gray-700 rounded flex-1 text-white focus:outline-none"
+                    className="p-2 bg-gray-200 dark:bg-gray-700 rounded flex-1 text-gray-900 dark:text-white focus:outline-none"
                   />
                   <button
                     onClick={() => addComment(task._id)}
-                    className="ml-2 bg-blue-600 p-2 rounded hover:bg-blue-700 flex items-center"
+                    className="ml-2 text-white bg-blue-500 hover:bg-blue-700 p-2 rounded flex items-center cursor-pointer"
                   >
-                    <FaComment />
+                    {commentInputs[task._id] && commentInputs[task._id].trim() !== '' ? (
+                      <FaPaperPlane />
+                    ) : (
+                      <FaComment />
+                    )}
                   </button>
                 </div>
               </div>
             </div>
           ))}
           {tasks.length === 0 && (
-            <p className="text-center text-gray-400">No tasks available.</p>
+            <p className="text-center text-gray-500 dark:text-gray-400">
+              No tasks available.
+            </p>
           )}
         </div>
       </div>

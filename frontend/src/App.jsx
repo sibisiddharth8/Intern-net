@@ -15,7 +15,7 @@ const ProtectedRoute = ({ children }) => {
 
 const App = () => {
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white">
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
