@@ -11,6 +11,7 @@ import {
 import { ImSpinner2 } from 'react-icons/im'; // Import spinner icon
 import Logo from '../assets/Xecute.svg';
 import Notification from '../components/Notification';
+import DeveloperLink from '../components/DeveloperLink';
 
 // Loading overlay component
 const LoadingOverlay = () => (
@@ -68,13 +69,13 @@ const Login = () => {
       <img
         src={Logo}
         alt="Logo"
-        className="w-1/14 translate-y-1/2 translate-x-1 z-20"
+        className="w-1/4 md:w-1/14 translate-y-1/2 translate-x-1 z-20"
       />
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col items-center justify-center gap-8 bg-gray-200 dark:bg-gray-800 p-8 rounded-xl shadow-md border w-80 z-10"
+        className="flex flex-col items-center justify-center gap-8 mb-8 bg-gray-200 dark:bg-gray-800 p-8 rounded-xl shadow-md border w-80 z-10"
       >
-        <div className="flex flex-col items-center justify-center gap-2">
+        <div className="flex flex-col items-center justify-center gap-2 mt-2">
           <div className="mt-2">
             <h2 className="text-center text-3xl dark:text-white font-bold">
               Welcome Back!
