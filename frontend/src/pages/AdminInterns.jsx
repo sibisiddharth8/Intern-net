@@ -26,6 +26,10 @@ const AdminInterns = () => {
   const [notification, setNotification] = useState(null);
   const [confirmAction, setConfirmAction] = useState(null);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const internsPerPage = 3;
+
   // Fetch interns from backend
   const fetchInterns = async () => {
     setLoading(true);
@@ -64,6 +68,23 @@ const AdminInterns = () => {
     return interns.filter((intern) => intern.collegeName === selectedCollege);
   }, [interns, selectedCollege]);
 
+  // Reset page if filtered interns change and current page exceeds total pages
+  useEffect(() => {
+    const totalPages = Math.ceil(filteredInterns.length / internsPerPage);
+    if (currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [filteredInterns, currentPage, internsPerPage]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredInterns.length / internsPerPage);
+  const indexOfLastIntern = currentPage * internsPerPage;
+  const indexOfFirstIntern = indexOfLastIntern - internsPerPage;
+  const currentInterns = filteredInterns.slice(
+    indexOfFirstIntern,
+    indexOfLastIntern
+  );
+
   const createIntern = async () => {
     try {
       await axios.post('/interns', newIntern);
@@ -88,6 +109,93 @@ const AdminInterns = () => {
   const handleEditClick = (intern) => {
     setEditingIntern(intern);
     setIsModalOpen(true);
+  };
+
+  // Pagination Handlers
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const renderPageNumbers = () => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => (
+        <button
+          key={i + 1}
+          onClick={() => setCurrentPage(i + 1)}
+          className={`mx-1 px-3 py-1 rounded ${
+            currentPage === i + 1
+              ? 'bg-blue-500 text-white'
+              : 'dark:bg-gray-700 dark:text-gray-200'
+          }`}
+        >
+          {i + 1}
+        </button>
+      ));
+    } else {
+      const pages = [];
+
+      // Always show first page
+      pages.push(
+        <button
+          key={1}
+          onClick={() => setCurrentPage(1)}
+          className={`mx-1 px-3 py-1 rounded ${
+            currentPage === 1
+              ? 'bg-blue-500 text-white'
+              : 'bg-gray-200 text-gray-700'
+          }`}
+        >
+          1
+        </button>
+      );
+
+      if (currentPage > 3) {
+        pages.push(<span key="start-ellipsis" className="mx-1">...</span>);
+      }
+
+      const startPage = Math.max(2, currentPage - 1);
+      const endPage = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(
+          <button
+            key={i}
+            onClick={() => setCurrentPage(i)}
+            className={`mx-1 px-3 py-1 rounded ${
+              currentPage === i
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-200 text-gray-700'
+            }`}
+          >
+            {i}
+          </button>
+        );
+      }
+
+      if (currentPage < totalPages - 2) {
+        pages.push(<span key="end-ellipsis" className="mx-1">...</span>);
+      }
+
+      // Always show last page
+      pages.push(
+        <button
+          key={totalPages}
+          onClick={() => setCurrentPage(totalPages)}
+          className={`mx-1 px-3 py-1 rounded ${
+            currentPage === totalPages
+              ? 'bg-blue-500 text-white'
+              : 'bg-gray-200 text-gray-700'
+          }`}
+        >
+          {totalPages}
+        </button>
+      );
+
+      return pages;
+    }
   };
 
   return (
@@ -239,8 +347,8 @@ const AdminInterns = () => {
           <h3 className="text-2xl font-semibold flex items-center mb-4">
             Intern List
           </h3>
-          {filteredInterns.length > 0 ? (
-            filteredInterns.map((intern) => (
+          {currentInterns.length > 0 ? (
+            currentInterns.map((intern) => (
               <div
                 key={intern._id}
                 className="bg-white dark:bg-gray-800 p-4 rounded mb-4 flex flex-col md:flex-row items-start md:items-center justify-between shadow"
@@ -281,6 +389,27 @@ const AdminInterns = () => {
             </p>
           )}
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center mt-10">
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+              className="mx-2 px-3 py-1 dark:bg-gray-700 dark:text-gray-200 rounded disabled:opacity-50"
+            >
+              Prev
+            </button>
+            {renderPageNumbers()}
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="mx-2 px-3 py-1 dark:bg-gray-700 dark:text-gray-200 rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        )}
 
         {/* Edit Intern Modal */}
         {isModalOpen && editingIntern && (
