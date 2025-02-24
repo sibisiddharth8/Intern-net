@@ -4,8 +4,8 @@ const DeveloperLink = ({ data }) => {
   if (!data || !data.developers) return null; // Handle missing data
 
   return (
-    <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center">
-      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+    <div className="absolute bottom-4 left-0 right-0 flex justify-center items-baseline">
+      <p className="text-xs text-gray-500 dark:text-gray-400">
         Designed and Developed by
       </p>
       <div className="flex items-center text-xs">
