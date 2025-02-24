@@ -12,6 +12,7 @@ import { ImSpinner2 } from 'react-icons/im'; // Import spinner icon
 import Logo from '../assets/Xecute.svg';
 import Notification from '../components/Notification';
 import DeveloperLink from '../components/DeveloperLink';
+import developerInfo from '../constants/DeveloperInfo.json'; // ✅ FIXED import name
 
 // Loading overlay component
 const LoadingOverlay = () => (
@@ -145,6 +146,9 @@ const Login = () => {
           onClose={() => setNotification({ message: '', type: '' })}
         />
       )}
+
+      {/* Developer Info */}
+      <DeveloperLink data={developerInfo} />
     </div>
   );
 };
