@@ -51,7 +51,7 @@ const Login = () => {
           navigate('/dashboard/intern');
         }
         setLoading(false); // Turn off loader after navigation
-      }, 2000);
+      }, 1000);
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Login failed';
       setNotification({ message: errorMessage, type: 'error' });
