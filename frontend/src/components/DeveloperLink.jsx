@@ -1,7 +1,7 @@
 import React from "react";
 
 const DeveloperLink = ({ data }) => {
-  if (!data || !data.developers) return null; // Handle missing data
+  if (!data || !data.developers) return null;
 
   return (
     <div className="absolute bottom-4 left-0 right-0 flex justify-center items-baseline">
